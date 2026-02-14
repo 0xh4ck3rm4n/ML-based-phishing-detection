@@ -35,7 +35,34 @@ class DatasetLoader:
         print(f" - Phishing: {labels.count(1)}")
 
         return urls, labels
+    
+
+    # [TODO: This function loads kaggle phishing email dataset] 
+    def load_kaggle_phishing_emails():
+        pass
+
 
     # This function normalize various label format to 0 [legitimate] and 1 [phishing]
-    def normalize_labels():
-        pass      
+    def normalize_labels(self, labels: List) -> List[int]:
+        """
+        Args:
+            labels: list of labels in various format
+        
+        Returns:
+            list of 0s and 1s
+        """
+        normalized = []
+
+        for label in labels:
+            label_str = str(label).lower().strip()
+            if any(term in label_str for term in ['phishing', 'bad', 'malicious', 'spam', '1', 'true']):
+                normalized.append(1)
+            elif any(term in label_str for term in ['legitimate', 'good', 'safe', '0', 'false']):
+                normalized.append(0)
+            else:
+                try:
+                    normalized.append(1 if int(float(label)) > 0 else 0)
+                except:
+                    normalized.append(0)
+        
+        return normalized
