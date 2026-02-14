@@ -9,12 +9,20 @@ class DatasetLoader:
             data_dir : directory containing dataset files 
         """
         self.data_dir = data_dir
-        os.makedirs(data_dir, exist_ok=True)
+        self.email_dir = os.path.join(data_dir, 'emails')
+        self.sms_dir = os.path.join(data_dir, 'sms')
+        self.audio_dir = os.path.join(data_dir, 'audio')
+        self.video_dir = os.path.join(data_dir, 'video')
+        self.deepfake_dir = os.path.join(data_dir, 'deepfake')
+        
+        for directory in [self.email_dir, self.sms_dir, self.audio_dir, 
+                         self.video_dir, self.deepfake_dir]:
+            os.makedirs(directory, exist_ok=True)
     
     # This function load kaggle phishing site urls dataset
     def load_kaggle_phishing_urls(self, filepath: Optional[str] = None) -> Tuple[List[str], List[int]]:
         if filepath is None:
-            filepath = os.path.join(self.data_dir, 'phishing_site_urls.csv')
+            filepath = os.path.join(self.email_dir, 'phishing_site_urls.csv')
         
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Kaggale dataset not found at {filepath}")
@@ -40,7 +48,7 @@ class DatasetLoader:
     # This function loads kaggle phishing email dataset
     def load_kaggle_phishing_emails(self, filepath: Optional[str] = None) -> Tuple[List[str], List[int]]:
         if filepath is None:
-            filepath = os.path.join(self.data_dir, 'Phishing_Email.csv')
+            filepath = os.path.join(self.email_dir, 'Phishing_Email.csv')
 
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Kaggle dataset not found at {filepath}")
@@ -48,7 +56,7 @@ class DatasetLoader:
         print(f"Loading Kaggle Phishing Email From {filepath}")
         df = pd.read_csv(filepath)
 
-        text_col = next((col for col in df.columns if 'email' in col.lower() or 'text' in col.lower()), df.columns[0])
+        text_col = next((col for col in df.columns if 'email' in col.lower() or 'text' in col.lower() or 'message' in col.lower()), df.columns[0])
         label_col = next((col for col in df.columns if 'label' in col.lower() or 'type' in col.lower()), df.columns[1])
 
         emails = df[text_col].astype(str).tolist()
