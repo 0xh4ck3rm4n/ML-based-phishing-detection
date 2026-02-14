@@ -17,7 +17,7 @@ class DatasetLoader:
             filepath = os.path.join(self.data_dir, 'phishing_site_urls.csv')
         
         if not os.path.exists(filepath):
-            raise FileNotFoundError("Kaggale dataset not found at {filepath}")
+            raise FileNotFoundError(f"Kaggale dataset not found at {filepath}")
         
         print(f"Loading Kaggle Phishing URLs from {filepath}")
         df = pd.read_csv(filepath)
@@ -31,16 +31,34 @@ class DatasetLoader:
         labels = self.normalize_labels(labels_raw)
 
         print(f"Loaded {len(urls)} URLs")  
-        print(f" - Legitimate: {labels.count(0)}")
-        print(f" - Phishing: {labels.count(1)}")
+        print(f"    - Legitimate: {labels.count(0)}")
+        print(f"    - Phishing: {labels.count(1)}")
 
         return urls, labels
     
 
-    # [TODO: This function loads kaggle phishing email dataset] 
-    def load_kaggle_phishing_emails():
-        pass
+    # This function loads kaggle phishing email dataset
+    def load_kaggle_phishing_emails(self, filepath: Optional[str] = None) -> Tuple[List[str], List[int]]:
+        if filepath is None:
+            filepath = os.path.join(self.data_dir, 'Phishing_Email.csv')
 
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Kaggle dataset not found at {filepath}")
+        
+        print(f"Loading Kaggle Phishing Email From {filepath}")
+        df = pd.read_csv(filepath)
+
+        text_col = next((col for col in df.columns if 'email' in col.lower() or 'text' in col.lower()), df.columns[0])
+        label_col = next((col for col in df.columns if 'label' in col.lower() or 'type' in col.lower()), df.columns[1])
+
+        emails = df[text_col].astype(str).tolist()
+        labels_raw = df[label_col].tolist()
+
+        labels = self.normalize_labels(labels_raw)
+
+        print(f"Loading {len(emails)} emails")
+        print(f"    - Legitimate: {labels.count(0)}")
+        print(f"    - Phishing: {labels.count(1)}")
 
     # This function normalize various label format to 0 [legitimate] and 1 [phishing]
     def normalize_labels(self, labels: List) -> List[int]:
