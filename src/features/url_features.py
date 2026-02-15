@@ -47,11 +47,21 @@ class URLFeatureExtractor:
             except:
                 return 0
 
-    def get_domain_length():
-        pass
+    # This function gets the length of domain length
+    def get_domain_length(self, url: str) -> int:
+        try:
+            parsed = urllib.parse.urlparse(url)
+            return len(parsed.netloc)
+        except:
+            return 0
 
-    def get_path_length():
-        pass
+    # This function gets the length of path
+    def get_path_length(self, url: str) -> int:
+        try:
+            parsed = urllib.parse.urlparse(url)
+            return len(parsed.path)
+        except:
+            return 0
 
     def has_shortening_service():
         pass
