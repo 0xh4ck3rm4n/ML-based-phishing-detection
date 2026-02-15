@@ -74,6 +74,8 @@ class DatasetLoader:
         print(f"    - Legitimate: {labels.count(0)}")
         print(f"    - Phishing: {labels.count(1)}")
 
+        return emails, labels
+
     # This function loads kaggle spam sms dataset
     def load_sms_spam_collection(self, filepath: Optional[str] = None) -> Tuple[List[str], List[int]]:
         if filepath is None:
@@ -168,8 +170,8 @@ class DatasetLoader:
             print(f"Found {len(manipulate_files)} manipulated video files!")
 
         if not video_paths:
-            print(f"No video files found in {video_paths}")
-            print(f"Expected structure: {video_paths}/original/ and {video_paths}/manipulate/")
+            print(f"No video files found in {video_dir}")
+            print(f"Expected structure: {video_dir}/original/ and {video_dir}/manipulate/")
         
         return video_paths, labels
 
