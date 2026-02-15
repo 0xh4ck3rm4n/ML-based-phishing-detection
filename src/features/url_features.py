@@ -1,5 +1,6 @@
 import re
 import urllib.parse
+from typing import List
 import numpy as np
 import tldextract
 
@@ -74,7 +75,6 @@ class URLFeatureExtractor:
             parsed = urllib.parse.urlparse(url)
             domain = parsed.netloc.lower()
             path = parsed.path.lower()
-            # Check if any part of domain appears in path
             domain_parts = domain.split('.')
             for part in domain_parts:
                 if len(part) > 3 and part in path:
@@ -99,13 +99,34 @@ class URLFeatureExtractor:
             return 0
 
     # This function checks for prefix / suffix seperators in domain
-    def prefix_suffix_in_domain():
-        pass
+    def prefix_suffix_in_domain(self, url: str) -> int:
+        try:
+            parsed = urllib.parse.urlparse(url)
+            domain = parsed.netloc
+            return 1 if '-' in domain or '_' in domain else 0
+        except:
+            return 0
     
     # This function detects the abnormal URL pattern
-    def abnormal_url():
-        pass
+    def abnormal_url(self, url: str) -> int:
+        try:
+            if url.count('http') > 1:
+                return 1
+            parsed = urllib.parse.urlparse(url)
+            if '@' in parsed.netloc:
+                return 1
+            return 0
+        except:
+            return 0
 
     # This function gets the name of all extracted features
-    def get_features_name():
-        pass
+    def get_features_name(self) -> List[str]:
+        return [
+            'url_length', 'dot_count', 'hyphen_count', 'underscore_count',
+            'slash_count', 'question_count', 'equal_count', 'at_count',
+            'ampersand_count', 'digit_count', 'has_ip', 'uses_https',
+            'suspicious_keyword_count', 'has_suspicious_tld', 'has_bad_tld',
+            'entropy', 'subdomain_count', 'domain_length', 'path_length',
+            'has_url_shortener', 'domain_in_path', 'special_char_count',
+            'suspicious_port', 'prefix_suffix_domain', 'abnormal_url'
+        ]
