@@ -101,7 +101,7 @@ class DatasetLoader:
         
         labels = [1 if 'spam' in str(label).lower() else 0 for label in labels_raw]
         
-        print(f"✓ Loaded {len(messages)} SMS messages")
+        print(f"Loaded {len(messages)} SMS messages")
         print(f"  - Legitimate: {labels.count(0)}")
         print(f"  - Spam/Phishing: {labels.count(1)}")
         
@@ -118,6 +118,7 @@ class DatasetLoader:
         audio_paths = []
         labels = []
 
+        # Load real audio files
         if os.path.exists(real_dir):
             real_files = glob.glob(os.path.join(real_dir, '*.wav')) + glob.glob(os.path.join(real_dir, '*mp3')) + glob.glob(os.path.join(real_dir, '*flac'))
 
@@ -125,6 +126,7 @@ class DatasetLoader:
             labels.extend([0] * len(real_files))
             print(f"Found {len(real_files)} real audio files!")
         
+        # Load fake audio files
         if os.path.exists(fake_dir):
             fake_files = glob.glob(os.path.join(fake_dir, '*.wav')) + glob.glob(os.path.join(fake_dir, '*.mp3')) + glob.glob(os.path.join(fake_dir, '*.flac'))
 
@@ -135,6 +137,42 @@ class DatasetLoader:
         if not audio_paths:
             print(f"No audio files found in {audio_dir}")
             print(f"Expected structure: {audio_dir}/real/ and {audio_dir}/fake/")
+
+        return audio_paths, labels
+
+    # This function is for loading deepfake video dataset
+    def load_faceforensics_dataset(self, video_dir: Optional[str] = None) -> Tuple[List[str], List[int]]:
+        if video_dir is None:
+            video_dir = self.video_dir
+        
+        original_dir = os.path.join(video_dir, 'original')
+        manipulate_dir = os.path.join(video_dir, 'manipulated')
+
+        video_paths = []
+        labels = []
+
+        # Load real video files
+        if os.path.exists(original_dir):
+            original_files = glob.glob(os.path.join(original_dir, '*.mp4')) + glob.glob(os.path.join(original_dir, '*.avi'))
+
+            video_paths.extend(original_files)
+            labels.extend([0] * len(original_files))
+            print(f"Found {len(original_files)} original video files!")
+        
+        # Load fake video files
+        if os.path.exists(manipulate_dir):
+            manipulate_files = glob.glob(os.path.join(manipulate_dir, '*.mp4')) + glob.glob(os.path.join(manipulate_dir, '*.avi'))
+
+            video_paths.extend(manipulate_files)
+            labels.extend([1] * len(manipulate_files))
+            print(f"Found {len(manipulate_files)} manipulated video files!")
+
+        if not video_paths:
+            print(f"No video files found in {video_paths}")
+            print(f"Expected structure: {video_paths}/original/ and {video_paths}/manipulate/")
+        
+        return video_paths, labels
+
 
     ###############################
     #        HELPER FUNCTION      #
