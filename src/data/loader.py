@@ -1,5 +1,11 @@
 import os 
 import pandas as pd
+import numpy as np
+import json
+import warnings
+import glob
+from typing import Tuple, List, Optional, Dict
+warnings.filterwarnings('ignore')
 
 class DatasetLoader:
 
@@ -101,6 +107,9 @@ class DatasetLoader:
         
         return messages, labels
 
+    # [TODO: This function is for loading audio deepfake dataset]
+    def load_audio_deepfake_dataset():
+        pass
 
 
     ###############################
@@ -132,6 +141,20 @@ class DatasetLoader:
         
         return normalized
     
-    # [TODO: This function generates legitimate URL to balance dataset]
-    def generate_legitimate_url():
-        pass
+    # This function generates legitimate URL to balance dataset
+    def generate_legitimate_url(self, count: int) -> List[str]:
+        legitimate_domains = ['google.com', 'wikipedia.org', 'youtube.com', 'facebook.com', 'twitter.com', 'instagram.com',
+            'linkedin.com', 'reddit.com', 'amazon.com', 'ebay.com',
+            'github.com', 'stackoverflow.com', 'apple.com', 'microsoft.com', 'netflix.com',
+            'cnn.com', 'bbc.com', 'nytimes.com', 'medium.com', 'wordpress.org',
+            'gmail.com', 'yahoo.com', 'bing.com', 'adobe.com', 'paypal.com']
+        
+        paths = ['', '/about', '/contact', '/products', '/services', '/blog', '/news', '/help', '/support']
+
+        urls = []
+        for i in range(count):
+            domain = legitimate_domains[i % len(legitimate_domains)]
+            path = paths[i % len(paths)]
+            urls.append(f"https://www.{domain}{path}")
+
+        return urls
