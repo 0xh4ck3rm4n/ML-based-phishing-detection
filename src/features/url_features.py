@@ -63,11 +63,25 @@ class URLFeatureExtractor:
         except:
             return 0
 
-    def has_shortening_service():
-        pass
+    # This function checks if the URL is using the shortening service
+    def has_shortening_service(self, url: str) -> int:
+        shortners = ['bit.ly', 'goo.gl', 'tinyurl', 'ow.ly', 't.co', 'is.gd', 'buff.ly']
+        return 1 if any(short in url.lower() for short in shortners) else 0
 
-    def domain_in_path():
-        pass
+    # This function checks if the domain name appears in path
+    def domain_in_path(self, url: str) -> int:
+        try:
+            parsed = urllib.parse.urlparse(url)
+            domain = parsed.netloc.lower()
+            path = parsed.path.lower()
+            # Check if any part of domain appears in path
+            domain_parts = domain.split('.')
+            for part in domain_parts:
+                if len(part) > 3 and part in path:
+                    return 1
+            return 0
+        except:
+            return 0
 
     def count_special_character():
         pass
