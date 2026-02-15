@@ -1,4 +1,7 @@
+import re
+import urllib.parse
 import numpy as np
+import tldextract
 
 class URLFeatureExtractor:
     def __init__(self):
@@ -29,8 +32,20 @@ class URLFeatureExtractor:
 
         return entropy
 
-    def count_subdomains():
-        pass
+    # This function is for counting the number of subdomains
+    def count_subdomains(self, url: str) -> int:
+        try:
+            ext = tldextract.extract(url)
+            if ext.subdomain:
+                return len(ext.subdomain.split('.'))
+            return 0
+        except:
+            try:
+                parsed = urllib.parse.urlparse(url)
+                domain_parts = parsed.netloc.split('.')
+                return max(0, len(domain_parts) - 2)
+            except:
+                return 0
 
     def get_domain_length():
         pass
