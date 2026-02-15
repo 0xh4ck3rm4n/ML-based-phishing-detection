@@ -220,3 +220,86 @@ class DatasetLoader:
             urls.append(f"https://www.{domain}{path}")
 
         return urls
+    
+    # This function loads all the available text based dataset
+    def load_all_text_data(self) -> Dict[str, Tuple[List[str], List[int]]]:
+        print("LOADING ALL TEXT-BASED DATASETS")
+        print("="*60 + "\n")
+
+        data = {}
+        
+        try:
+            urls, url_labels = self.load_kaggle_phishing_urls()
+            data['urls'] = (urls, url_labels)
+        except FileNotFoundError as e:
+            print(f"Skipping URLs {str(e)}")
+            data['urls'] = ([], [])
+
+        try:
+            emails, email_labels = self.load_kaggle_phishing_emails()
+            data['emails'] = (emails, email_labels)
+        except FileNotFoundError as e:
+            print(f"Skipping emails {str(e)}")
+            data['emails'] = ([], [])
+
+        try:
+            sms, sms_labels = self.load_sms_spam_collection()
+            data['sms'] = (sms, sms_labels)
+        except FileNotFoundError as e:
+            print(f"Skipping SMS {str(e)}")
+            data['sms'] = ([], [])
+        
+        return data
+    
+    # This function loads all the available audio and video dataset
+    def load_all_audio_video_data(self) -> Dict[str, Tuple[List[str], List[int]]]:
+        print("LOADING ALL AUDIO/VIDEO DATASETS")
+        print("="*60 + "\n")
+        
+        data = {}
+        
+        # Load Audio
+        audio_paths, audio_labels = self.load_audio_deepfake_dataset()
+        data['audio'] = (audio_paths, audio_labels)
+        
+        # Load Video
+        video_paths, video_labels = self.load_faceforensics_dataset()
+        data['video'] = (video_paths, video_labels)
+        
+        return data
+    
+    # This function provides the summary of all the available dataset
+    def get_dataset_summary(self) -> Dict:
+        text_data = self.load_all_text_data()
+        av_data = self.load_all_audio_video_data()
+        
+        summary = {
+            'urls': len(text_data['urls'][0]),
+            'emails': len(text_data['emails'][0]),
+            'sms': len(text_data['sms'][0]),
+            'audio': len(av_data['audio'][0]),
+            'video': len(av_data['video'][0]),
+            'total': sum([
+                len(text_data['urls'][0]),
+                len(text_data['emails'][0]),
+                len(text_data['sms'][0]),
+                len(av_data['audio'][0]),
+                len(av_data['video'][0])
+            ])
+        }
+        return summary
+
+if __name__ == "__main__":
+    loader = DatasetLoader()
+
+    summary = loader.get_dataset_summary()
+    print("DATASET SUMMARY")
+    print("="*60)
+    print(f"URLs:   {summary['urls']:,}")
+    print(f"Emails: {summary['emails']:,}")
+    print(f"SMS:    {summary['sms']:,}")
+    print(f"Audio:  {summary['audio']:,}")
+    print(f"Video:  {summary['video']:,}")
+    print(f"─" * 60)
+    print(f"TOTAL:  {summary['total']:,}")
+    print("="*60)       

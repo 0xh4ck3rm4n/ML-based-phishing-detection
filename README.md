@@ -25,23 +25,23 @@ This project demonstrates:
 
 **1. Email/URL Phishing (Kaggle)**
 
-**Link**: https://www.kaggle.com/datasets/taruntiwarihp/phishing-site-urls
+- **Link**: https://www.kaggle.com/datasets/taruntiwarihp/phishing-site-urls
 
 **2. Phishing Email (Kaggle)**
 
-**Link**: https://www.kaggle.com/datasets/subhajournal/phishingemails
+- **Link**: https://www.kaggle.com/datasets/subhajournal/phishingemails
 
 **3. SMS spam collection (UCI/Kaggle)**
 
-**Link**: https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset
+- **Link**: https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset
 
 **4. FaceForensic (Deepfake Videos)**
 
-**Link**: https://github.com/ondyari/FaceForensics
+- **Link**: https://github.com/ondyari/FaceForensics
 
 **5. ASVspoof (Audio Deepfake)**
 
-**Link**: https://www.asvspoof.org/
+- **Link**: https://www.asvspoof.org/
 
 ## License
 
