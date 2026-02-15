@@ -83,12 +83,20 @@ class URLFeatureExtractor:
         except:
             return 0
 
-    def count_special_character():
-        pass
+    # This function is to count special characters
+    def count_special_character(self, url: str) -> int:
+        special_chars = ['!', '#', '$', '%', '^', '*', '(', ')', '[', ']', '{', '}', '|', '\\', '<', '>']
+        return sum(url.count(char) for char in special_chars)
     
     # This function checks for suspicous port number
-    def has_suspicious_port():
-        pass
+    def has_suspicious_port(self, url: str) -> int:
+        try:
+            parsed = urllib.parse.urlparse(url)
+            if parsed.port and parsed.port not in [80, 443, 8080, 8443]:
+                return 1
+            return 0
+        except:
+            return 0
 
     # This function checks for prefix / suffix seperators in domain
     def prefix_suffix_in_domain():
