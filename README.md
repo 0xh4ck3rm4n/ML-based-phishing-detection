@@ -7,11 +7,36 @@ A project for machine learning-based phishing detection system which is trained 
 
 ## Overview
 
+This project demonstrates:
+
+- NLP-based analysis with BERT/DistilBERT
+- Spam and smishing detection
+- Face manipulation detection
+- Voice call phishing analysis (Vishing Detection)
+- AI-generated voice detection
+
 ## Learning Outcomes
 
 ## Quick Start
 
 ## Project Structure
+
+## Used Datasets
+
+**1. Email/URL Phishing (Kaggle)**
+Link: https://www.kaggle.com/datasets/taruntiwarihp/phishing-site-urls
+
+**2. Phishing Email (Kaggle)**
+Link: https://www.kaggle.com/datasets/subhajournal/phishingemails
+
+**3. SMS spam collection (UCI/Kaggle)**
+Link: https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset
+
+**4. FaceForensic (Deepfake Videos)**
+Link: https://github.com/ondyari/FaceForensics
+
+**5. ASVspoof (Audio Deepfake)**
+Link: https://www.asvspoof.org/
 
 ## License
 
