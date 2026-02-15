@@ -107,10 +107,34 @@ class DatasetLoader:
         
         return messages, labels
 
-    # [TODO: This function is for loading audio deepfake dataset]
-    def load_audio_deepfake_dataset():
-        pass
+    # This function is for loading audio deepfake dataset
+    def load_audio_deepfake_dataset(self, audio_dir: Optional[str] = None) -> Tuple[List[str], List[int]]:
+        if audio_dir is None:
+            audio_dir = self.audio_dir
+        
+        real_dir = os.path.join(audio_dir, 'real')
+        fake_dir = os.path.join(audio_dir, 'fake')
 
+        audio_paths = []
+        labels = []
+
+        if os.path.exists(real_dir):
+            real_files = glob.glob(os.path.join(real_dir, '*.wav')) + glob.glob(os.path.join(real_dir, '*mp3')) + glob.glob(os.path.join(real_dir, '*flac'))
+
+            audio_paths.extend(real_files)
+            labels.extend([0] * len(real_files))
+            print(f"Found {len(real_files)} real audio files!")
+        
+        if os.path.exists(fake_dir):
+            fake_files = glob.glob(os.path.join(fake_dir, '*.wav')) + glob.glob(os.path.join(fake_dir, '*.mp3')) + glob.glob(os.path.join(fake_dir, '*.flac'))
+
+            audio_paths.extend(fake_files)
+            labels.extend([1] * len(fake_files))
+            print(f"Found {len(fake_files)} fake audio files!")
+
+        if not audio_paths:
+            print(f"No audio files found in {audio_dir}")
+            print(f"Expected structure: {audio_dir}/real/ and {audio_dir}/fake/")
 
     ###############################
     #        HELPER FUNCTION      #
