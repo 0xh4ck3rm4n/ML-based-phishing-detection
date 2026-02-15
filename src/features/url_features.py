@@ -6,7 +6,14 @@ import tldextract
 
 class URLFeatureExtractor:
     def __init__(self):
-        pass
+        self.suspicious_keywords = [
+            'login', 'signin', 'account', 'update', 'verify', 'secure',
+            'banking', 'confirm', 'password', 'suspend', 'urgent', 'click',
+            'free', 'bonus', 'prize', 'winner', 'congratulations'
+        ]
+        
+        self.legitimate_tlds = ['.com', '.org', '.edu', '.gov', '.net']
+        self.suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top', '.click']
     
     # This function extract all features from the URL
     def extract():
@@ -130,3 +137,13 @@ class URLFeatureExtractor:
             'has_url_shortener', 'domain_in_path', 'special_char_count',
             'suspicious_port', 'prefix_suffix_domain', 'abnormal_url'
         ]
+
+if __name__ == "__main__":
+    extractor = URLFeatureExtractor()
+    test_urls = ["https://www.google.com/search", "http://paypal-verify.tk/login.php?id=123&session=abc"]
+
+    for url in test_urls:
+        features = extractor.extract(url)
+        print(f"\nURL: {url}")
+        print(f"Features: {features}")
+        print(f"Feature count: {len(features)}")
