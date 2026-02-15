@@ -68,6 +68,45 @@ class DatasetLoader:
         print(f"    - Legitimate: {labels.count(0)}")
         print(f"    - Phishing: {labels.count(1)}")
 
+    # This function loads kaggle spam sms dataset
+    def load_sms_spam_collection(self, filepath: Optional[str] = None) -> Tuple[List[str], List[int]]:
+        if filepath is None:
+            filepath = os.path.join(self.sms_dir, 'spam.csv')
+        
+        if not os.path.exists(filepath):
+            print(f"SMS spam dataset not found at {filepath}")
+            return [], []
+        
+        print(f"Loading SMS Spam Collection...")
+        
+        try:
+            df = pd.read_csv(filepath, encoding='latin-1')
+        except:
+            df = pd.read_csv(filepath)
+        
+        if 'v1' in df.columns and 'v2' in df.columns:
+            label_col, text_col = 'v1', 'v2'
+        else:
+            label_col = df.columns[0]
+            text_col = df.columns[1]
+        
+        messages = df[text_col].astype(str).tolist()
+        labels_raw = df[label_col].tolist()
+        
+        labels = [1 if 'spam' in str(label).lower() else 0 for label in labels_raw]
+        
+        print(f"✓ Loaded {len(messages)} SMS messages")
+        print(f"  - Legitimate: {labels.count(0)}")
+        print(f"  - Spam/Phishing: {labels.count(1)}")
+        
+        return messages, labels
+
+
+
+    ###############################
+    #        HELPER FUNCTION      #
+    ###############################
+
     # This function normalize various label format to 0 [legitimate] and 1 [phishing]
     def normalize_labels(self, labels: List) -> List[int]:
         """
@@ -92,3 +131,7 @@ class DatasetLoader:
                     normalized.append(0)
         
         return normalized
+    
+    # [TODO: This function generates legitimate URL to balance dataset]
+    def generate_legitimate_url():
+        pass
