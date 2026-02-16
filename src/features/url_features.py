@@ -16,12 +16,58 @@ class URLFeatureExtractor:
         self.suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top', '.click']
     
     # This function extract all features from the URL
-    def extract():
-        pass
+    def extract(self, url: str) -> np.ndarray:
+        features = []
+        
+        # Basic length features
+        features.append(len(url))                           
+        features.append(url.count('.'))                     
+        features.append(url.count('-'))                     
+        features.append(url.count('_'))                     
+        features.append(url.count('/'))                     
+        features.append(url.count('?'))                    
+        features.append(url.count('='))                    
+        features.append(url.count('@'))                    
+        features.append(url.count('&'))                     
+        features.append(sum(c.isdigit() for c in url))
+        
+        # Binary features
+        ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+        features.append(1 if re.search(ip_pattern, url) else 0)  # 11. Has IP
+        features.append(1 if url.startswith('https://') else 0)   # 12. Uses HTTPS
+        
+        # Keyword analysis
+        keyword_count = sum(1 for kw in self.suspicious_keywords if kw in url.lower())
+        features.append(keyword_count)                      # 13. Suspicious keyword count
+        
+        # TLD analysis
+        has_legit_tld = any(tld in url.lower() for tld in self.legitimate_tlds)
+        features.append(0 if has_legit_tld else 1)         
+        
+        has_suspicious_tld = any(tld in url.lower() for tld in self.suspicious_tlds)
+        features.append(1 if has_suspicious_tld else 0)    
+        
+        # Entropy
+        features.append(self._calculate_entropy(url))       
+        
+        # Domain features
+        features.append(self._count_subdomains(url))        
+        features.append(self._get_domain_length(url))       
+        features.append(self._get_path_length(url))         
+        
+        # Advanced features
+        features.append(self._has_shortening_service(url)) 
+        features.append(self._domain_in_path(url))          
+        features.append(self._count_special_chars(url))     
+        features.append(self._has_suspicious_port(url))     
+        features.append(self._prefix_suffix_in_domain(url)) 
+        features.append(self._abnormal_url(url))            
+        
+        return np.array(features, dtype=float)
     
     # This function extract features from multiple URLs
-    def extract_batch():
-        pass
+    def extract_batch(self, urls: List[str]) -> np.ndarray:
+        return np.array([self.extract(url) for url in urls])
 
     # This function calculates shannon entropy
     def calculate_entropy(self, text: str) -> float:
