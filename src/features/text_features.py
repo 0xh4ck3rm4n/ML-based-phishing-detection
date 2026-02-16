@@ -143,7 +143,6 @@ class TextFeatureExtractor:
         embeddings = []
         
         for text in texts:
-            # Tokenize and encode
             inputs = self.transformer_tokenizer(
                 text,
                 return_tensors='pt',
@@ -152,7 +151,6 @@ class TextFeatureExtractor:
                 padding=True
             )
             
-            # Get embeddings
             with torch.no_grad():
                 outputs = self.transformer_model(**inputs)
                 # Use [CLS] token embedding
@@ -170,10 +168,8 @@ class TextFeatureExtractor:
         
         stat_features = np.array(stat_features)
         
-        # Extract TF-IDF features
         tfidf_features = self.extract_tfidf(texts).toarray()
         
-        # Combine
         combined = np.hstack([stat_features, tfidf_features])
         
         return combined
@@ -189,3 +185,18 @@ class TextFeatureExtractor:
             'url_count', 'email_count',
             'sentiment_positive', 'sentiment_negative', 'sentiment_compound'
         ]
+    
+class EmailFeatureExtractor(TextFeatureExtractor):
+    
+    # This function is used for extracting specific email features
+    def extract_email_specific(self, email: str) -> Dict[str, float]:
+        features = {}
+        
+        features['has_subject'] = 1 if 'subject:' in email.lower() else 0
+        features['has_from'] = 1 if 'from:' in email.lower() else 0
+        features['has_to'] = 1 if 'to:' in email.lower() else 0
+        
+        features['has_attachment_mention'] = 1 if any(word in email.lower() for word in ['attachment', 'attached', 'file']) else 0
+        features['has_link_text'] = 1 if 'click' in email.lower() and 'here' in email.lower() else 0
+        
+        return features
