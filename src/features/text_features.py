@@ -70,9 +70,9 @@ class TextFeatureExtractor:
             model_name = 'distilbert-base-uncased'
             self.transformer_tokenizer = AutoTokenizer.from_pretrained(model_name)
             self.transformer_model = AutoModel.from_pretrained(model_name)
-            print(f"✓ Loaded transformer model: {model_name}")
+            print(f"Loaded transformer model: {model_name}")
         except Exception as e:
-            print(f"⚠️  Could not load transformer model: {e}")
+            print(f"Could not load transformer model: {e}")
             self.use_transformers = False
     
     # This function fit the TF-IDF vectorizer on training texts
@@ -87,42 +87,35 @@ class TextFeatureExtractor:
         text_lower = text.lower()
         words = word_tokenize(text_lower)
         
-        # Basic statistics
-        features['text_length'] = len(text)                                 # 1
-        features['word_count'] = len(words)                                 # 2
-        features['avg_word_length'] = np.mean([len(w) for w in words]) if words else 0  # 3
+        features['text_length'] = len(text)                                 
+        features['word_count'] = len(words)                                 
+        features['avg_word_length'] = np.mean([len(w) for w in words]) if words else 0 
         
-        # Punctuation features
-        features['exclamation_count'] = text.count('!')                     # 4
-        features['question_count'] = text.count('?')                        # 5
-        features['exclamation_ratio'] = text.count('!') / max(len(text), 1) # 6
+        features['exclamation_count'] = text.count('!')                     
+        features['question_count'] = text.count('?')                        
+        features['exclamation_ratio'] = text.count('!') / max(len(text), 1) 
         
-        # Case features
-        features['capital_count'] = sum(1 for c in text if c.isupper())   # 7
-        features['capital_ratio'] = features['capital_count'] / max(len(text), 1)  # 8
-        features['all_caps_words'] = sum(1 for w in words if w.isupper() and len(w) > 1)  # 9
+        features['capital_count'] = sum(1 for c in text if c.isupper())   
+        features['capital_ratio'] = features['capital_count'] / max(len(text), 1)  
+        features['all_caps_words'] = sum(1 for w in words if w.isupper() and len(w) > 1)  
         
-        # Keyword features
-        features['phishing_keyword_count'] = sum(1 for kw in self.phishing_keywords if kw in text_lower)  # 10
-        features['urgency_word_count'] = sum(1 for uw in self.urgency_words if uw in text_lower)  # 11
-        features['money_word_count'] = sum(1 for mw in self.money_words if mw in text_lower)  # 12
+        features['phishing_keyword_count'] = sum(1 for kw in self.phishing_keywords if kw in text_lower)  
+        features['urgency_word_count'] = sum(1 for uw in self.urgency_words if uw in text_lower)  
+        features['money_word_count'] = sum(1 for mw in self.money_words if mw in text_lower)  
         
-        # Specific phrase detection (binary)
-        features['has_click_here'] = 1 if 'click here' in text_lower else 0  # 13
-        features['has_verify'] = 1 if 'verify' in text_lower else 0          # 14
-        features['has_urgent'] = 1 if 'urgent' in text_lower else 0          # 15
+        features['has_click_here'] = 1 if 'click here' in text_lower else 0  
+        features['has_verify'] = 1 if 'verify' in text_lower else 0          
+        features['has_urgent'] = 1 if 'urgent' in text_lower else 0        
         
-        # URL and email detection
         url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        features['url_count'] = len(re.findall(url_pattern, text))          # 16
-        features['email_count'] = len(re.findall(email_pattern, text))      # 17
+        features['url_count'] = len(re.findall(url_pattern, text))          
+        features['email_count'] = len(re.findall(email_pattern, text))      
         
-        # Sentiment analysis (VADER)
         sentiment_scores = self.sentiment_analyzer.polarity_scores(text)
-        features['sentiment_positive'] = sentiment_scores['pos']            # 18
-        features['sentiment_negative'] = sentiment_scores['neg']            # 19
-        features['sentiment_compound'] = sentiment_scores['compound']       # 20
+        features['sentiment_positive'] = sentiment_scores['pos']            
+        features['sentiment_negative'] = sentiment_scores['neg']            
+        features['sentiment_compound'] = sentiment_scores['compound']       
         
         return features
 
@@ -153,7 +146,6 @@ class TextFeatureExtractor:
             
             with torch.no_grad():
                 outputs = self.transformer_model(**inputs)
-                # Use [CLS] token embedding
                 embedding = outputs.last_hidden_state[:, 0, :].numpy()
                 embeddings.append(embedding[0])
         
@@ -198,5 +190,20 @@ class EmailFeatureExtractor(TextFeatureExtractor):
         
         features['has_attachment_mention'] = 1 if any(word in email.lower() for word in ['attachment', 'attached', 'file']) else 0
         features['has_link_text'] = 1 if 'click' in email.lower() and 'here' in email.lower() else 0
+        
+        return features
+
+class SMSFeatureExtractor(TextFeatureExtractor):
+
+    # This function is used for extracting SMS specific features
+    def extract_sms_specific(self, sms: str) -> Dict[str, float]:
+        features = {}
+        
+        features['has_short_code'] = 1 if re.search(r'\b\d{5,6}\b', sms) else 0
+        features['has_premium_rate'] = 1 if re.search(r'\b(send|text|reply)\s+\w+\s+to\s+\d+', sms, re.I) else 0
+        features['message_length'] = len(sms)
+        features['is_very_short'] = 1 if len(sms) < 20 else 0
+        
+        features['has_opt_out'] = 1 if any(word in sms.lower() for word in ['stop', 'unsubscribe', 'opt out']) else 0
         
         return features
