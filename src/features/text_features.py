@@ -207,3 +207,18 @@ class SMSFeatureExtractor(TextFeatureExtractor):
         features['has_opt_out'] = 1 if any(word in sms.lower() for word in ['stop', 'unsubscribe', 'opt out']) else 0
         
         return features
+
+if __name__ == "__main__":
+    extractor = TextFeatureExtractor()
+    
+    test_texts = [
+        "Hello, your order has been shipped.",
+        "URGENT!!! Click here NOW to verify your account!!!"
+    ]
+    
+    extractor.fit(test_texts)
+    
+    for text in test_texts:
+        features = extractor.extract_statistical(text)
+        print(f"\nText: {text[:50]}...")
+        print(f"Features: {features}")
