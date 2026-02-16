@@ -81,8 +81,50 @@ class TextFeatureExtractor:
         self.is_fitted = True
     
     # This function extract statistical features from text
-    def extract_statistical():
-        pass
+    def extract_statistical(self, text: str) -> Dict[str, float]:
+        features = {}
+        
+        text_lower = text.lower()
+        words = word_tokenize(text_lower)
+        
+        # Basic statistics
+        features['text_length'] = len(text)                                 # 1
+        features['word_count'] = len(words)                                 # 2
+        features['avg_word_length'] = np.mean([len(w) for w in words]) if words else 0  # 3
+        
+        # Punctuation features
+        features['exclamation_count'] = text.count('!')                     # 4
+        features['question_count'] = text.count('?')                        # 5
+        features['exclamation_ratio'] = text.count('!') / max(len(text), 1) # 6
+        
+        # Case features
+        features['capital_count'] = sum(1 for c in text if c.isupper())   # 7
+        features['capital_ratio'] = features['capital_count'] / max(len(text), 1)  # 8
+        features['all_caps_words'] = sum(1 for w in words if w.isupper() and len(w) > 1)  # 9
+        
+        # Keyword features
+        features['phishing_keyword_count'] = sum(1 for kw in self.phishing_keywords if kw in text_lower)  # 10
+        features['urgency_word_count'] = sum(1 for uw in self.urgency_words if uw in text_lower)  # 11
+        features['money_word_count'] = sum(1 for mw in self.money_words if mw in text_lower)  # 12
+        
+        # Specific phrase detection (binary)
+        features['has_click_here'] = 1 if 'click here' in text_lower else 0  # 13
+        features['has_verify'] = 1 if 'verify' in text_lower else 0          # 14
+        features['has_urgent'] = 1 if 'urgent' in text_lower else 0          # 15
+        
+        # URL and email detection
+        url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        features['url_count'] = len(re.findall(url_pattern, text))          # 16
+        features['email_count'] = len(re.findall(email_pattern, text))      # 17
+        
+        # Sentiment analysis (VADER)
+        sentiment_scores = self.sentiment_analyzer.polarity_scores(text)
+        features['sentiment_positive'] = sentiment_scores['pos']            # 18
+        features['sentiment_negative'] = sentiment_scores['neg']            # 19
+        features['sentiment_compound'] = sentiment_scores['compound']       # 20
+        
+        return features
 
     # This function extract TF-IDF features from texts
     def extract_tfidf(self, texts: List[str]):
@@ -120,8 +162,21 @@ class TextFeatureExtractor:
         return np.array(embeddings)
     
     # This function extract combined features: statistical + TF-IDF
-    def extract_combined():
-        pass
+    def extract_combined(self, texts: List[str]) -> np.ndarray:
+        stat_features = []
+        for text in texts:
+            stat_dict = self.extract_statistical(text)
+            stat_features.append(list(stat_dict.values()))
+        
+        stat_features = np.array(stat_features)
+        
+        # Extract TF-IDF features
+        tfidf_features = self.extract_tfidf(texts).toarray()
+        
+        # Combine
+        combined = np.hstack([stat_features, tfidf_features])
+        
+        return combined
     
     # This function get names of statistical features
     def get_feature_names(self) -> List[str]:
