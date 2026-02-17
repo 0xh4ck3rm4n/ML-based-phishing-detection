@@ -22,7 +22,6 @@ class VideoFeatureExtractor:
         fps = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         
-        # Calculate frame skip to match target FPS
         frame_skip = max(1, int(fps / self.target_fps))
         
         frames = []
@@ -134,8 +133,6 @@ class VideoFeatureExtractor:
         
         for frame in frames:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            
-            # Canny edge detection
             edges = cv2.Canny(gray, 100, 200)
             edge_density = np.sum(edges > 0) / edges.size
             edge_densities.append(edge_density)
@@ -154,17 +151,14 @@ class VideoFeatureExtractor:
         for frame in frames:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
-            # 2D FFT
             fft = np.fft.fft2(gray)
             fft_shift = np.fft.fftshift(fft)
             magnitude = np.abs(fft_shift)
-            
-            # High frequency energy
+
             h, w = magnitude.shape
             center_h, center_w = h // 2, w // 2
             radius = min(h, w) // 4
             
-            # Create mask for high frequencies (outer region)
             y, x = np.ogrid[:h, :w]
             mask = ((x - center_w)**2 + (y - center_h)**2) > radius**2
             
