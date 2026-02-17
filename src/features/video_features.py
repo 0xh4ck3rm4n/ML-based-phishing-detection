@@ -73,17 +73,14 @@ class VideoFeatureExtractor:
             prev_gray = cv2.cvtColor(frames[i-1], cv2.COLOR_BGR2GRAY)
             curr_gray = cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY)
             
-            # Frame difference
             diff = cv2.absdiff(curr_gray, prev_gray)
             frame_diffs.append(np.mean(diff))
             
-            # Optical flow (Farneback method)
             flow = cv2.calcOpticalFlowFarneback(
                 prev_gray, curr_gray,
                 None, 0.5, 3, 15, 3, 5, 1.2, 0
             )
             
-            # Magnitude of optical flow
             magnitude = np.sqrt(flow[..., 0]**2 + flow[..., 1]**2)
             optical_flows.append(np.mean(magnitude))
         
@@ -125,7 +122,6 @@ class VideoFeatureExtractor:
         features['color_std_g'] = np.mean(color_stds[:, 1])
         features['color_std_r'] = np.mean(color_stds[:, 2])
         
-        # Color consistency across frames
         features['color_temporal_consistency'] = np.mean(np.std(color_means, axis=0))
         
         return features
@@ -150,8 +146,37 @@ class VideoFeatureExtractor:
         return features
     
     # This function extract frequency domain features (FFT-based)
-    def extract_frequency_features():
-        pass
+    def extract_frequency_features(self, frames: List[np.ndarray]) -> dict:
+        features = {}
+        
+        high_freq_energies = []
+        
+        for frame in frames:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            
+            # 2D FFT
+            fft = np.fft.fft2(gray)
+            fft_shift = np.fft.fftshift(fft)
+            magnitude = np.abs(fft_shift)
+            
+            # High frequency energy
+            h, w = magnitude.shape
+            center_h, center_w = h // 2, w // 2
+            radius = min(h, w) // 4
+            
+            # Create mask for high frequencies (outer region)
+            y, x = np.ogrid[:h, :w]
+            mask = ((x - center_w)**2 + (y - center_h)**2) > radius**2
+            
+            high_freq_energy = np.mean(magnitude[mask])
+            low_freq_energy = np.mean(magnitude[~mask])
+            
+            high_freq_energies.append(high_freq_energy / (low_freq_energy + 1e-10))
+        
+        features['high_freq_ratio_mean'] = np.mean(high_freq_energies)
+        features['high_freq_ratio_std'] = np.std(high_freq_energies)
+        
+        return features
 
     def extract_all_features():
         pass
