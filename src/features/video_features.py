@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional, Dict
 import os
 
 class VideoFeatureExtractor:
-    
+
     def __init__(self, target_fps: int = 5, max_frames: int = 100):
         self.target_fps = target_fps
         self.max_frames = max_frames
@@ -55,8 +55,48 @@ class VideoFeatureExtractor:
         pass
     
     # This function extract temporal features such as motion, optical flow
-    def extract_temporal_features():
-        pass
+    def extract_temporal_features(self, frames: List[np.ndarray]) -> dict:
+        features = {
+            'motion_magnitude': 0,
+            'optical_flow_mean': 0,
+            'optical_flow_std': 0,
+            'frame_difference_mean': 0
+        }
+        
+        if len(frames) < 2:
+            return features
+        
+        frame_diffs = []
+        optical_flows = []
+        
+        for i in range(1, len(frames)):
+            prev_gray = cv2.cvtColor(frames[i-1], cv2.COLOR_BGR2GRAY)
+            curr_gray = cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY)
+            
+            # Frame difference
+            diff = cv2.absdiff(curr_gray, prev_gray)
+            frame_diffs.append(np.mean(diff))
+            
+            # Optical flow (Farneback method)
+            flow = cv2.calcOpticalFlowFarneback(
+                prev_gray, curr_gray,
+                None, 0.5, 3, 15, 3, 5, 1.2, 0
+            )
+            
+            # Magnitude of optical flow
+            magnitude = np.sqrt(flow[..., 0]**2 + flow[..., 1]**2)
+            optical_flows.append(np.mean(magnitude))
+        
+        if frame_diffs:
+            features['frame_difference_mean'] = np.mean(frame_diffs)
+            features['frame_difference_std'] = np.std(frame_diffs)
+        
+        if optical_flows:
+            features['optical_flow_mean'] = np.mean(optical_flows)
+            features['optical_flow_std'] = np.std(optical_flows)
+            features['motion_magnitude'] = np.max(optical_flows)
+        
+        return features
     
     # This function is responsible for extracting color-based features
     def extract_color_features():
