@@ -233,3 +233,35 @@ class VideoFeatureExtractor:
             'edge_density_mean', 'edge_density_std',
             'high_freq_ratio_mean', 'high_freq_ratio_std'
         ]
+
+class DeepfakeVideoDetector:
+    def __init__(self):
+        self.extractor = VideoFeatureExtractor()
+
+    def extract_deepfake_specific_features(self, video_path: str) -> dict:
+        frames, _ = self.extractor.load_video(video_path)
+        
+        features = {}
+        
+        eye_cascade = cv2.CascadeClassifier(
+            cv2.data.haarcascades + 'haarcascade_eye.xml'
+        )
+        
+        blink_detections = []
+        for frame in frames:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            eyes = eye_cascade.detectMultiScale(gray)
+            blink_detections.append(len(eyes))
+        
+        if blink_detections:
+            features['eye_detection_consistency'] = np.std(blink_detections)
+            features['avg_eyes_detected'] = np.mean(blink_detections)
+        
+        return features
+
+if __name__ == "__main__":
+    print("VideoFeatureExtractor - Ready to process video files")
+    print("Use extract_all_features(video_path) to extract features from video")
+    
+    extractor = VideoFeatureExtractor()
+    print(f"Total features extracted: {len(extractor.get_feature_names())}")
