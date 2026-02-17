@@ -178,11 +178,58 @@ class VideoFeatureExtractor:
         
         return features
 
-    def extract_all_features():
-        pass
+    def extract_all_features(self, video_path: str) -> np.ndarray:
+        frames, fps = self.load_video(video_path)
+        
+        if len(frames) == 0:
+            raise ValueError(f"No frames extracted from video: {video_path}")
+        
+        face_features = self.extract_face_features(frames)
+        temporal_features = self.extract_temporal_features(frames)
+        color_features = self.extract_color_features(frames)
+        texture_features = self.extract_texture_features(frames)
+        frequency_features = self.extract_frequency_features(frames)
+        
+        all_features = {
+            'fps': fps,
+            'num_frames': len(frames),
+            **face_features,
+            **temporal_features,
+            **color_features,
+            **texture_features,
+            **frequency_features
+        }
+        
+        feature_vector = np.array(list(all_features.values()))
+        
+        return feature_vector
 
-    def extract_batch():
-        pass
+    def extract_batch(self, video_paths: List[str]) -> np.ndarray:
+        features = []
+        
+        for i, video_path in enumerate(video_paths):
+            try:
+                print(f"Processing video {i+1}/{len(video_paths)}: {os.path.basename(video_path)}")
+                feature_vector = self.extract_all_features(video_path)
+                features.append(feature_vector)
+            except Exception as e:
+                print(f"Error processing {video_path}: {e}")
+                # Add zero vector for failed files
+                if len(features) > 0:
+                    features.append(np.zeros_like(features[0]))
+        
+        return np.array(features)
 
-    def get_features_name():
-        pass
+    def get_features_name(self) -> List[str]:
+        return [
+            'fps', 'num_frames',
+            'faces_detected', 'avg_face_size', 'face_size_std',
+            'face_consistency', 'face_detection_rate',
+            'motion_magnitude', 'optical_flow_mean', 'optical_flow_std',
+            'frame_difference_mean', 'frame_difference_std',
+            'color_mean_b', 'color_mean_g', 'color_mean_r',
+            'color_std_b', 'color_std_g', 'color_std_r',
+            'color_temporal_consistency',
+            'edge_density_mean', 'edge_density_std',
+            'high_freq_ratio_mean', 'high_freq_ratio_std'
+        ]
