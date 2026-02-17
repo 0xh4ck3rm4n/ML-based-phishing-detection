@@ -99,8 +99,36 @@ class VideoFeatureExtractor:
         return features
     
     # This function is responsible for extracting color-based features
-    def extract_color_features():
-        pass
+    def extract_color_features(self, frames: List[np.ndarray]) -> dict:
+        features = {}
+        
+        color_means = []
+        color_stds = []
+        
+        for frame in frames:
+            # Convert to different color spaces
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            
+            # BGR statistics
+            color_means.append(np.mean(frame, axis=(0, 1)))
+            color_stds.append(np.std(frame, axis=(0, 1)))
+        
+        color_means = np.array(color_means)
+        color_stds = np.array(color_stds)
+        
+        features['color_mean_b'] = np.mean(color_means[:, 0])
+        features['color_mean_g'] = np.mean(color_means[:, 1])
+        features['color_mean_r'] = np.mean(color_means[:, 2])
+        
+        features['color_std_b'] = np.mean(color_stds[:, 0])
+        features['color_std_g'] = np.mean(color_stds[:, 1])
+        features['color_std_r'] = np.mean(color_stds[:, 2])
+        
+        # Color consistency across frames
+        features['color_temporal_consistency'] = np.mean(np.std(color_means, axis=0))
+        
+        return features
     
     # This functione extract texture features using edge detection
     def extract_texture_features(self, frames: List[np.ndarray]) -> dict:
